@@ -1,12 +1,23 @@
 FROM node:18-alpine
 
-WORKDIR /dockerApp
+WORKDIR /app
 
-COPY package* .
+COPY package.json yarn.lock ./
 
-RUN yarn
+RUN yarn install
 
 COPY . .
 
-CMD ["node", "index.js"]
+RUN yarn build
+
+WORKDIR /app/db
+
+COPY db/package.json db/yarn.lock ./
+
+RUN yarn install
+
+ENV environment=production
+
 EXPOSE 3000
+
+CMD ["yarn","start"]

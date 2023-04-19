@@ -11,7 +11,7 @@ const connectDb = async () => {
     let host = HOST;
     let database = PGDB;
     let password = PGPASS;
-    let port = PORT;
+    let port = parseInt(PORT);
 
     client = new Client({
       user,
@@ -24,23 +24,21 @@ const connectDb = async () => {
     await waitPort({
       host,
       port,
-      timeout: 10000,
+      timeout: 4000,
       waitForDns: true,
     });
 
     await client.connect();
-
-    console.log("Connected to Postgres Server at Port", port);
-
-    const res = await client.query(
-      "SELECT * FROM pg_stat_activity where state='active'"
-    );
-    await client.end();
-
-    return res.rows;
   } catch (error) {
     console.log(error);
   }
 };
 
-module.exports = { connectDb };
+const getActiveUsers = async (req, res) => {
+  const response = await client.query(
+    "SELECT * FROM pg_stat_activity where state='active'"
+  );
+  res.json(response.rows);
+};
+
+module.exports = { connectDb, getActiveUsers };
